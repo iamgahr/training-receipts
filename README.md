@@ -15,7 +15,7 @@ ARM + H100 96 GB), one H100 80 GB (x86 host), one A100, and CPU-only machines fo
 | 2 | **Proving one GPT-2 124M training step takes 104–106 s on one GH200** on our fastest path (vocabulary 50,304, 124.5 M parameters). The frozen configuration our audited runs use, on their smaller 65-symbol-vocabulary model (85.9 M parameters), takes ~24–25 min of proving (~32–33 min per step end to end). | [§2](#2-proving-time-per-step) |
 | 3 | **AdamW is fully checked inside the receipts.** A 64-step AdamW run had 10 beacon-sampled steps proven and accepted, **and 47 of 47 steps replay bit for bit between ARM (GH200) and x86 (H100).** | [§3](#3-adamw-and-bit-for-bit-across-cpu-architectures) |
 | 4 | **One GPT-2-small-configuration training step split across two machines (GH200 + H100) verifies as one step.** This is our first proof spanning two GPUs, and a separate machine reproduced it from scratch with independently built verifiers. | [§4](#4-one-step-across-two-machines) |
-| 5 | **An exact integer training rule tracks bf16 on real text** (GPT-2 124M on FineWeb): within **0.04 nats** of held-out loss through 2,000 steps. *Early result, one seed; 4,000-step and second-seed runs are in progress.* | [§5](#5-an-exact-integer-training-rule-on-real-text), [`results/fineweb-integer-rule.csv`](results/fineweb-integer-rule.csv) |
+| 5 | **An exact integer training rule tracks bf16 on real text** (GPT-2 124M on FineWeb): within **0.04 nats** of held-out loss at every checkpoint through 4,000 steps, and 0.019 at the end. *Early result, one seed; a second-seed run is in progress.* | [§5](#5-an-exact-integer-training-rule-on-real-text), [`results/fineweb-integer-rule.csv`](results/fineweb-integer-rule.csv) |
 | 6 | **The rule's core kernel is 11× faster** than our current exact rules (matrix multiply plus exact rounding, GPU time: 78.9 µs vs 0.870 ms), with outputs equal. | [§6](#6-kernel-speed) |
 | 7 | **A third GPU type proves as it trains:** on an A100, 18 consecutive steps of a fresh AdamW run are each proven, verified by two independent verifiers, and chained to the previous step. | [§7](#7-proving-as-it-trains-a100) |
 
@@ -79,13 +79,14 @@ building an exact integer training rule that runs on integer tensor cores and st
 **Setup:** GPT-2 124M (vocabulary 50,304), FineWeb, 16 × 1,024 tokens a step, AdamW, cosine schedule over 4,000 steps, the same seed
 and the same batches in every run. The table shows held-out loss minus bf16's at the same step (lower is better; our bar is 0.05):
 
-| Rule | step 500 | step 1,000 | step 1,500 | step 2,000 |
-|---|---|---|---|---|
-| first version | +0.675 | +1.068 | +1.265 | — (plateaued) |
-| second version | +0.027 | +0.049 | +0.056 | +0.136 |
-| **current version** | **+0.021** | **+0.040** | **+0.026** | **+0.039** |
+| Rule | 500 | 1,000 | 1,500 | 2,000 | 2,500 | 3,000 | 3,500 | 4,000 |
+|---|---|---|---|---|---|---|---|---|
+| first version | +0.675 | +1.068 | +1.265 | — (plateaued) | | | | |
+| second version | +0.027 | +0.049 | +0.056 | +0.136 | | | | |
+| **current version** | **+0.021** | **+0.040** | **+0.026** | **+0.039** | **+0.021** | **+0.022** | **+0.018** | **+0.019** |
 
-bf16 reference held-out loss: 6.094 / 5.582 / 5.273 / 5.003. Data: [`results/fineweb-integer-rule.csv`](results/fineweb-integer-rule.csv).
+Columns are training steps. bf16 reference held-out loss: 6.094 / 5.582 / 5.273 / 5.003 / 4.824 / 4.705 / 4.632 / 4.590; the current
+version ends at 4.609. Data: [`results/fineweb-integer-rule.csv`](results/fineweb-integer-rule.csv).
 
 ## 6. Kernel speed
 
@@ -114,12 +115,12 @@ failed on a harness problem and was re-settled; every later step passed on the f
   ~2 MB of proof files it reads. Both are available on request.
 - **The root trusts the per-step node checks.** We ran them. With our verifier, anyone can re-run them from the per-step receipt
   files (measured: 62 s and 511 MB per step); those files are large and available on request.
-- **Most steps are sampled, not proven.** Gold run 1 proved 31 of its 300 steps. Separately, we are proving its first 25 steps one by
-  one with no sampling: 24 of 25 are done.
+- **Most steps are sampled, not proven.** Gold run 1 proved 31 of its 300 steps. Separately, we have now proven its first 25 steps
+  one by one, with no sampling; their combined root is being built.
 - **Security level:** the step receipts currently give about 84–88 bits of soundness. Raising it is planned work.
-- **The integer training rule is early.** The result above is one seed to 2,000 steps; longer and second-seed runs are in progress. The
+- **The integer training rule is early.** The result above is one seed, 4,000 steps at 124M; a second-seed run is in progress. The
   speed-up is for the kernel, not yet for a full training step; the rest of the step is the next cost.
-- **"Laptop"** means laptop-class resources (4 cores, 60 MB). We measured on 4 pinned cores of an ARM server, not on an actual laptop.
+- **The 1.47 s check** ran on 4 pinned cores of an ARM server with 60 MB of memory (laptop-class resources), not on an actual laptop.
 
 ## What more compute would answer
 
