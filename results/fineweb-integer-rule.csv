@@ -1,0 +1,12 @@
+# GPT-2 124M (vocabulary 50304) on FineWeb; 16 x 1024 tokens a step; AdamW, cosine schedule over 4,000 steps; the same seed and the
+# same batches in every run. Held-out loss on 20 x 16 validation windows. bf16 = stock bf16 training. rule_v1 / rule_v2 / rule_v3 =
+# successive versions of our exact integer training rule (v3 = current). Blank = not run that far.
+step,bf16,rule_v1,rule_v2,rule_v3
+499,6.0935,6.7682,6.1204,6.1140
+999,5.5821,6.6496,5.6313,5.6220
+1499,5.2733,6.5378,5.3290,5.2990
+1999,5.0026,,5.1385,5.0420
+2499,4.8238,,,
+2999,4.7049,,,
+3499,4.6319,,,
+3999,4.5901,,,

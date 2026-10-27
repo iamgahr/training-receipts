@@ -1,0 +1,6 @@
+# GPU time by CUDA-graph replay on the GH200, 2026-10-27, at the shape M 8192, K 3072, N 768 (an MLP GEMM of the GPT-2-small config).
+# integer_rule: our exact integer rule's matrix multiply plus its exact rounding. current_exact: our current exact rules' GEMM path.
+# Outputs equal between builds at all 5 linear-layer shapes; sampled rows equal to the reference implementation.
+operation,integer_rule_us,current_exact_us,speedup
+gemm_plus_exact_rounding_no_bias,78.9,870,11.0
+gemm_plus_exact_rounding_with_bias,130,884,6.8

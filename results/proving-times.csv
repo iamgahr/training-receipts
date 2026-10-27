@@ -1,0 +1,18 @@
+# Seconds per training step of the GPT-2-small configuration (12 layers x 768); the model column gives each row's vocabulary and size. Every run passed every check (statement / layout / tape equal; verifier ACCEPT).
+# fastest_path: the prover pipeline (witness || replay, then prove) on one GH200, 2026-10-24. audited: the frozen configuration used for the
+# audited gold runs (gold run 1's steps; 65-symbol vocabulary), 2026-10-26/27: witness, replay of all earlier committed steps, prove, verify + fold.
+path,machine,model,step,witness_s,replay_s,prove_s,step_total_s
+fastest_path,GH200,vocab50304_124.5M,run bx,,,104,
+fastest_path,GH200,vocab50304_124.5M,run by,,,105,
+fastest_path,GH200,vocab50304_124.5M,run bw,,,105,
+fastest_path,GH200,vocab50304_124.5M,run bv,,,106,
+audited,GH200,vocab65_85.9M,1,148,110,1471,1918
+audited,GH200,vocab65_85.9M,2,149,110,1452,1903
+audited,GH200,vocab65_85.9M,5,150,111,1431,1891
+audited,GH200,vocab65_85.9M,8,150,110,1440,1913
+audited,GH200,vocab65_85.9M,10,153,112,1483,1973
+audited,GH200,vocab65_85.9M,12,148,110,1466,1954
+audited,GH200,vocab65_85.9M,14,154,110,1474,1976
+audited,GH200,vocab65_85.9M,16,150,111,1461,1966
+audited,GH200,vocab65_85.9M,19,149,110,1470,1986
+audited,H100,vocab65_85.9M,9,,,3929,
